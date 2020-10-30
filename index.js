@@ -7,7 +7,7 @@ const bot = new TelegramBot(token, {polling: true})
 let c = 0
 
 let arr = []
-
+var premium = []
 bot.on('message', (msg) => {
     
     //if(msg.chat.first_name == 'Gais')   c+=1;
@@ -26,13 +26,18 @@ bot.on('message', (msg) => {
 
     if(arr[msg.from.id] >=3){
         console.log("You outt");
-        console.log(msg.chat.id,msg.from.id,Date.now()+ms("5m"));
-        bot.sendMessage(msg.chat.id, "You outt  " + msg.from.first_name+" from "+msg.chat.id);
-        bot.restrictChatMember(msg.chat.id,msg.from.id,Date.now()+ms("5m"),false,
-        false,
-        false,
-        false
-            );
+        console.log(msg.chat.username||msg.chat.id,msg.from.id,Date.now()+ms("5m"));
+        bot.sendMessage(msg.chat.id, "You outt  " + msg.from.first_name+" from "+msg.chat.id+"("+"@"+msg.chat.username+")");
+        bot.restrictChatMember(msg.chat.id,
+            msg.from.id,{until_date:Date.now()+ms("5m"),
+            can_send_messages:false,
+            can_send_media_messages:false,
+            can_send_polls:false,
+            can_send_other_messages:false,
+            can_add_web_page_previews:false,
+            can_change_info:false,
+            can_invite_users:false,
+            can_pin_messages:false});
     }
         
     });
@@ -44,7 +49,7 @@ bot.on('message', (msg) => {
             
         });
 
-
+    
     bot.onText(/\/count/, (msg) => {
 
         let ans = ""
@@ -65,5 +70,11 @@ bot.on('message', (msg) => {
                 ans += "@"+msg.from.username + " : " + arr[key] + "\n"
             };
             bot.sendMessage(msg.chat.id,ans)
+                    
+            });
+    bot.onText(/\/premium/, (msg) => {
+            console.log(arr);
+            let ans = ""
+            console.log(msg.from);
                     
             });
