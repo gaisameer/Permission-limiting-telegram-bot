@@ -1,5 +1,5 @@
 const TelegramBot = require('node-telegram-bot-api')
-
+const ms = require('ms')
 const token = '1443720842:AAEucMJDoQ6JqAe5dC8nt2zbIPZYhgD2gRY';
 
 const bot = new TelegramBot(token, {polling: true})
@@ -26,9 +26,12 @@ bot.on('message', (msg) => {
 
     if(arr[msg.from.id] >=3){
         console.log("You outt");
+        console.log(msg.chat.id,msg.from.id,Date.now()+ms("5m"));
         bot.sendMessage(msg.chat.id, "You outt  " + msg.from.first_name+" from "+msg.chat.id);
-        bot.restrictChatMember(toString(msg.chat.id),msg.from.id, can_send_messages=false,
-            {until_date: Date.now() + ms("5m")}
+        bot.restrictChatMember(msg.chat.id,msg.from.id,Date.now()+ms("5m"),false,
+        false,
+        false,
+        false
             );
     }
         
@@ -48,18 +51,18 @@ bot.on('message', (msg) => {
         //bot.sendMessage(msg.from.id,"Gais sent " + c + " messages.")
         for(var key in arr){
             console.log(key+" : " + arr[key])
-            ans += "tg://user?id="+key + " : " + arr[key] + "\n"
+            ans += "@"+msg.from.username + " : " + arr[key] + "\n"
         }
         bot.sendMessage(msg.chat.id,ans)
                 
         });
     bot.onText(/\/cntall/, (msg) => {
-
+            console.log(arr);
             let ans = ""
             //bot.sendMessage(msg.from.id,"Gais sent " + c + " messages.")
             for(var key in arr){
                 console.log(key+" : " + arr[key])
-                ans += "<a href='tg://user?id="+key+"'>"+key+"</a>"
+                ans += "@"+msg.from.username + " : " + arr[key] + "\n"
             };
             bot.sendMessage(msg.chat.id,ans)
                     
