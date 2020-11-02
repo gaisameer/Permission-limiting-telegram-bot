@@ -7,18 +7,20 @@ const bot = new TelegramBot(token, {polling: true})
 let c = 0
 let arr = {}
 var premium = {}
+let username = {}
 bot.on('message', (msg) => {
     
     user = msg.from.id      //use id
     console.log(arr);
     if(user in arr){
-        arr[user][0] += 1
+        arr[user] += 1
         // if(arr[user][1]!=msg.from.username){
         //     arr[user][1]=msg.from.username
         // }
     }
     else {
         arr[user]= 1
+        username[user] = msg.from.first_name
         // arr[user]=msg.from.username
     }
 
@@ -61,8 +63,8 @@ bot.on('message', (msg) => {
         let ans = ""
         //bot.sendMessage(msg.from.id,"Gais sent " + c + " messages.")
         for(var key in arr){
-            console.log(key+" : " + arr[key])
-            ans += "@"+msg.from.username + " : " + arr[key] + "\n"
+            console.log(key+" : " + username[key] + ":" + arr[key])
+            ans += username[key] + " : " + arr[key] + "\n"
         }
         bot.sendMessage(msg.chat.id,ans)
                 
