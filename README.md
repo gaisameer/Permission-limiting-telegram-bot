@@ -8,5 +8,10 @@ It is currently online on http://t.me/SalesMngr_bot
 - `npm install`
 - start the bot with the app.js (either use `node app.js` or use a manager like pm2)
 
+## Expected behaviour
+Allow non-premium users to send only one message in 24hours.
+
+After 24 hours of message send,the restriction is lifted. 
+
 ## Current project state
 Incomplete
