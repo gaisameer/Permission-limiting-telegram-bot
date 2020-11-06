@@ -2,9 +2,8 @@
 
 This bot aims to be a simple counter bot to keep a track of no.of messages a user sends each day and restrict the user if he is a non-paid user& do nothing if he is a paid user in a group chat.  
 
-It is currently online on http://t.me/SalesMngr_bot
-add the bot to your supergroup, give it admin privilages& type in `/start`.. 
-
+It is currently online on http://t.me/SalesMngr_bot .
+- To make use of the bot, add the bot to your supergroup, give it admin privilages& type in `/start` (not right now tho)
 
 ## Installation
 
