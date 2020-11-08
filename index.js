@@ -1,5 +1,5 @@
 const TelegramBot = require('node-telegram-bot-api')
-//const ms = require('ms')
+const ms = require('ms')
 //const moment = require('moment');
 //const { now } = require('moment');
 
@@ -53,21 +53,17 @@ bot.on('message', (msg) => {
             
             var d = new Date();
             d.setDate(d.getDate() + 1);
-            d.setHours(0, 0, 0);
-            d.setMilliseconds(0);
+           d.setHours(0, 0, 0);
+           d.setMilliseconds(0);
+           
+           //var d5 = new Date('2020-11-07T13:28:43.041Z')
+
+          // var someDate = new Date('Sat, 7 Nov 2020 13:30:00 GMT');
+          //  var theUnixTime = someDate.getUnixTime();
             
             console.log(new Date)
-            console.log(d);
-
-            // var d5 = new Date();
-            // d5.setMinutes(d5.getMinutes + 2)
             
-            
-            // console.log(new Date)
-            // console.log(unix(new Date))
-            // console.log(moment.unix(new Date).add(1,'day'))
-            //const stat = 
-            bot.restrictChatMember(msg.chat.id,
+            var d5 = bot.restrictChatMember(msg.chat.id,
                 msg.from.id,                            //Date.now()+ms("5m"),
                 {
                 can_invite_users:false,
@@ -77,7 +73,8 @@ bot.on('message', (msg) => {
                 can_send_other_messages:false,
                 can_add_web_page_previews:false,
                 can_change_info:false,
-                can_pin_messages:false},d);
+                can_pin_messages:false,
+                until_date:Math.round((Date.now() + ms("1 days"))/1000)});
                 //console.log(d5)
         }
 
