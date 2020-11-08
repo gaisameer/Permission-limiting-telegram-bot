@@ -19,7 +19,7 @@ These commands are expected to work on telegram supergroups only
 - /premium : Command to add a member to premium (select any message sent by the user & reply to the message with this command)
 - /count : Command to show how many messages was sent by each of the users
 - /help : Command to show the help section
-
+- /unban : Command to unban non-premium members
 
 ## Current project state
 Incomplete
