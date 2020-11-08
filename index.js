@@ -14,6 +14,7 @@ let username = {}
 
 
 
+
 bot.onText(/\/start/, (msg) => {
     bot.sendMessage(msg.chat.id, "Welcome " + msg.from.first_name);
 
@@ -23,13 +24,13 @@ bot.onText(/\/start/, (msg) => {
             premium[element.user.id]=2
             }
     console.log("premium    :: ",premium);
+    //console.log(msg.text)
     }));
     });
 
 
 bot.on('message', (msg) => {
-    user = msg.from.id;      //use id
-
+    user = msg.from.id;      
     if(user in arr){
         arr[user] += 1
     }
@@ -38,33 +39,14 @@ bot.on('message', (msg) => {
         username[user] = msg.from.first_name
     }
     console.log(arr);
-    // let per = {can_send_messages:false,
-    //     can_send_media_messages:false,
-    //     can_send_polls:false,
-    //     can_send_other_messages:false,
-    //     can_add_web_page_previews:false,
-    //     can_change_info:false,
-    //     can_invite_users:false,
-    //     can_pin_messages:false}
+ 
 
     if(!(user in premium)){
-        if(arr[user] =1 && msg.text != "/start"){
-            //let x = telegramBot.restrictChatMember(msg.chat.id, user,per,moment.unix(new Date).add(1, 'day'))
+        if(arr[user] =1 && msg.text.indexOf("/start")!=0){
             
-            var d = new Date();
-            d.setDate(d.getDate() + 1);
-           d.setHours(0, 0, 0);
-           d.setMilliseconds(0);
-           
-           //var d5 = new Date('2020-11-07T13:28:43.041Z')
-
-          // var someDate = new Date('Sat, 7 Nov 2020 13:30:00 GMT');
-          //  var theUnixTime = someDate.getUnixTime();
-            
-            console.log(new Date)
             
             var d5 = bot.restrictChatMember(msg.chat.id,
-                msg.from.id,                            //Date.now()+ms("5m"),
+                msg.from.id,                           
                 {
                 can_invite_users:false,
                 can_send_messages:false,
@@ -75,43 +57,12 @@ bot.on('message', (msg) => {
                 can_change_info:false,
                 can_pin_messages:false,
                 until_date:Math.round((Date.now() + ms("1 days"))/1000)});
-                //console.log(d5)
+
         }
 
     }
 
 })
-
-
-
-
-   /* var Hi = "hi";
-    if (msg.text.toString().toLowerCase().indexOf(Hi) === 0) {
-        bot.sendMessage(msg.chat.id, "Hello  " + msg.from.first_name);
-    } */
-
-    /*
-    if(!(msg.from.id in premium)){
-        if(arr[msg.from.id] >=3){
-            bot.sendMessage(msg.chat.id, "You outt  " + msg.from.first_name+" from "+msg.chat.id+"("+"@"+msg.chat.username+")");
-            
-            const releaseDate = moment.unix(new Date).add(1, 'minute');
-            console.log(releaseDate)
-            const stat = bot.restrictChatMember(msg.chat.id,
-            msg.from.id,{until_date:releaseDate.unix(),                            //Date.now()+ms("5m"),
-            can_send_messages:false,
-            can_send_media_messages:false,
-            can_send_polls:false,
-            can_send_other_messages:false,
-            can_add_web_page_previews:false,
-            can_change_info:false,
-            can_invite_users:false,
-            can_pin_messages:false});
-
-            console.log(stat)
-        }  
-        }
-    }); */
 
     
 
