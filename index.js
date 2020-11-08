@@ -117,20 +117,4 @@ bot.on('message', (msg) => {
     });
 
 
-    bot.onText(/\/unban/, (msg) =>{
-
-        if(msg.from.id in premium && msg.reply_to_message!=null){
-            if(premium[msg.from.id]==2 && msg.from.is_bot==false && !(msg.reply_to_message.from.id  in premium)){
-                    //premium[msg.reply_to_message.from.id]=1;
-                    var d5 = bot.restrictChatMember(msg.chat.id,
-                        msg.reply_to_message.from.id,                           
-                        {
-                        can_invite_users:true,
-                        can_send_messages:true,
-                        can_send_media_messages:true,
-                        can_send_polls:true,
-                        can_send_other_messages:true,
-                        can_add_web_page_previews:true,
-                        can_change_info:true,
-                        can_pin_messages:true});
-                }}});
+    
