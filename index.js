@@ -1,19 +1,12 @@
 const TelegramBot = require('node-telegram-bot-api')
 const ms = require('ms')
-//const moment = require('moment');
-//const { now } = require('moment');
-
 const token = '1443720842:AAEucMJDoQ6JqAe5dC8nt2zbIPZYhgD2gRY';
-
 const bot = new TelegramBot(token, {polling: true})
 
 let c = 0
 let arr = {}
 var premium = {}
 let username = {}
-
-
-
 
 bot.onText(/\/start/, (msg) => {
     bot.sendMessage(msg.chat.id, "Welcome " + msg.from.first_name);
@@ -27,7 +20,6 @@ bot.onText(/\/start/, (msg) => {
     //console.log(msg.text)
     }));
     });
-
 
 bot.on('message', (msg) => {
     user = msg.from.id;      
@@ -105,6 +97,18 @@ bot.on('message', (msg) => {
                 
                 bot.sendMessage(msg.chat.id,ans)
                 console.log("Premium : ",premium);
+                //unban 
+                var d5 = bot.restrictChatMember(msg.chat.id,
+                    msg.reply_to_message.from.id,
+                    {
+                    can_invite_users:true,
+                    can_send_messages:true,
+                    can_send_media_messages:true,
+                    can_send_polls:true,
+                    can_send_other_messages:true,
+                    can_add_web_page_previews:true,
+                    can_change_info:true,
+                    can_pin_messages:true});
                 }
             });
     bot.onText(/\/view/, (msg) =>{
