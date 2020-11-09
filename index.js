@@ -1,8 +1,9 @@
 const TelegramBot = require('node-telegram-bot-api')
 const ms = require('ms')
-const token = '1443720842:AAEucMJDoQ6JqAe5dC8nt2zbIPZYhgD2gRY';
+require('dotenv').config()
+const token = process.env.SECRET_KEY;
+console.log(token)
 const bot = new TelegramBot(token, {polling: true})
-
 let c = 0
 let arr = {}
 var premium = {}
