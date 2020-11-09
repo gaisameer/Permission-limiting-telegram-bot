@@ -1,9 +1,8 @@
 const TelegramBot = require('node-telegram-bot-api')
 const ms = require('ms')
-require('dotenv').config()
-const token = process.env.SECRET_KEY;
-console.log(token)
+const token = '1443720842:AAEucMJDoQ6JqAe5dC8nt2zbIPZYhgD2gRY';
 const bot = new TelegramBot(token, {polling: true})
+
 let c = 0
 let arr = {}
 var premium = {}
@@ -50,6 +49,8 @@ bot.on('message', (msg) => {
                 can_change_info:false,
                 can_pin_messages:false,
                 until_date:Math.round((Date.now() + ms("1 days"))/1000)});
+
+            
 
         }
 
@@ -120,7 +121,6 @@ bot.on('message', (msg) => {
         });
         bot.sendMessage(msg.chat.id,ans)
     });
-    
     bot.onText(/\/unban/, (msg) =>{
         if(msg.from.id in premium && msg.reply_to_message!=null){
             if(premium[msg.from.id]==2 && msg.from.is_bot==false && !(msg.reply_to_message.from.id  in premium)){
@@ -136,4 +136,4 @@ bot.on('message', (msg) => {
                         can_add_web_page_previews:true,
                         can_change_info:true,
                         can_pin_messages:true});
-                }}});
+                }}})
