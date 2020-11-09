@@ -1,12 +1,31 @@
 const TelegramBot = require('node-telegram-bot-api')
 const ms = require('ms')
-const token = '1443720842:AAEucMJDoQ6JqAe5dC8nt2zbIPZYhgD2gRY';
-const bot = new TelegramBot(token, {polling: true})
+//const moment = require('moment');
+//const { now } = require('moment');
+
+
+const config = require('./config');
+
+const bot = new TelegramBot(config.botToken, {polling: true})
 
 let c = 0
 let arr = {}
 var premium = {}
 let username = {}
+
+
+
+const helpMsg = `Command reference:
+/start - Start bot (mandatory in groups)
+/premium - To change a user to premium ( This should be sent as reply to a message that the user sent. This command will only work if it is used by an admin
+/unban - Command to unban a user. Will only work if used by an admin
+/stop - Attemt to stop bot
+/about - Show information about the bot
+/help - Show this help page`;
+
+
+const aboutMsg = "This bot was created by @gais_ameer @sachinhere1 & @Sonusurabhi\nSource code and contact information can be found at https://github.com/sachin-in1/salesmngr_bot";
+
 
 bot.onText(/\/start/, (msg) => {
     bot.sendMessage(msg.chat.id, "Welcome " + msg.from.first_name);
@@ -20,6 +39,7 @@ bot.onText(/\/start/, (msg) => {
     //console.log(msg.text)
     }));
     });
+
 
 bot.on('message', (msg) => {
     user = msg.from.id;      
@@ -49,8 +69,6 @@ bot.on('message', (msg) => {
                 can_change_info:false,
                 can_pin_messages:false,
                 until_date:Math.round((Date.now() + ms("1 days"))/1000)});
-
-            
 
         }
 
@@ -99,18 +117,6 @@ bot.on('message', (msg) => {
                 
                 bot.sendMessage(msg.chat.id,ans)
                 console.log("Premium : ",premium);
-                //unban 
-                var d5 = bot.restrictChatMember(msg.chat.id,
-                    msg.reply_to_message.from.id,
-                    {
-                    can_invite_users:true,
-                    can_send_messages:true,
-                    can_send_media_messages:true,
-                    can_send_polls:true,
-                    can_send_other_messages:true,
-                    can_add_web_page_previews:true,
-                    can_change_info:true,
-                    can_pin_messages:true});
                 }
             });
     bot.onText(/\/view/, (msg) =>{
@@ -136,4 +142,13 @@ bot.on('message', (msg) => {
                         can_add_web_page_previews:true,
                         can_change_info:true,
                         can_pin_messages:true});
-                }}})
+                }}});
+                
+    bot.onText(/\/help/, (msg) => {
+        let ans = helpMsg
+        bot.sendMessage(msg.chat.id,ans)
+        });                
+    bot.onText(/\/about/, (msg) => {
+        let ans = aboutMsg
+        bot.sendMessage(msg.chat.id,ans)
+        });
