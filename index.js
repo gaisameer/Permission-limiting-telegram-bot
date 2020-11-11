@@ -1,6 +1,6 @@
 const TelegramBot = require('node-telegram-bot-api')
 const ms = require('ms')
-require('dotenv').config()
+
 const token = '1443720842:AAEucMJDoQ6JqAe5dC8nt2zbIPZYhgD2gRY';
 const bot = new TelegramBot(token, {polling: true})
 
@@ -8,6 +8,19 @@ let c = 0
 let arr = {}
 var premium = {}
 let username = {}
+
+
+
+const helpMsg = `Command reference:
+/start - Start bot (mandatory in groups)
+/premium - To change a user to premium ( This should be sent as reply to a message that the user sent. This command will only work if it is used by an admin
+/unban - Command to unban a user. Will only work if used by an admin
+/stop - Attemt to stop bot
+/about - Show information about the bot
+/help - Show this help page`;
+
+
+const aboutMsg = "This bot was created by @gais_ameer @sachinhere1 & @Sonusurabhi\nSource code and contact information can be found at https://github.com/sachin-in1/salesmngr_bot";
 
 bot.onText(/\/start/, (msg) => {
     bot.sendMessage(msg.chat.id, "Welcome " + msg.from.first_name);
@@ -126,6 +139,7 @@ bot.on('message', (msg) => {
         if(msg.from.id in premium && msg.reply_to_message!=null){
             if(premium[msg.from.id]==2 && msg.from.is_bot==false && !(msg.reply_to_message.from.id  in premium)){
                     //premium[msg.reply_to_message.from.id]=1;
+                    //arr[msg.chat.id]= 0
                     var d5 = bot.restrictChatMember(msg.chat.id,
                         msg.reply_to_message.from.id,                          
                         {
@@ -138,3 +152,14 @@ bot.on('message', (msg) => {
                         can_change_info:true,
                         can_pin_messages:true});
                 }}})
+
+
+
+                bot.onText(/\/help/, (msg) => {
+                    let ans = helpMsg
+                    bot.sendMessage(msg.chat.id,ans)
+                    });                
+                bot.onText(/\/about/, (msg) => {
+                    let ans = aboutMsg
+                    bot.sendMessage(msg.chat.id,ans)
+                    });               
