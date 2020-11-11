@@ -1,5 +1,6 @@
 const TelegramBot = require('node-telegram-bot-api')
 const ms = require('ms')
+require('dotenv').config()
 const token = '1443720842:AAEucMJDoQ6JqAe5dC8nt2zbIPZYhgD2gRY';
 const bot = new TelegramBot(token, {polling: true})
 
@@ -34,7 +35,7 @@ bot.on('message', (msg) => {
  
 
     if(!(user in premium)){
-        if(arr[user] =1 && msg.text.indexOf("/start")!=0){
+        if(arr[user] ==3 && msg.text.indexOf("/start")!=0){
             
             
             var d5 = bot.restrictChatMember(msg.chat.id,
