@@ -125,6 +125,7 @@ bot.on('message', (msg) => {
                     can_add_web_page_previews:true,
                     can_change_info:true,
                     can_pin_messages:true});
+                    arr[msg.reply_to_message.from.id]=0;
                 }
             });
     bot.onText(/\/view/, (msg) =>{
@@ -151,6 +152,7 @@ bot.on('message', (msg) => {
                         can_add_web_page_previews:true,
                         can_change_info:true,
                         can_pin_messages:true});
+                        arr[msg.reply_to_message.from.id]=0;
                 }}})
 
 
