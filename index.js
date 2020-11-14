@@ -21,7 +21,6 @@ const helpMsg = `Command reference:
 
 
 const aboutMsg = "This bot was created by @gais_ameer @sachinhere1 & @Sonusurabhi\nSource code and contact information can be found at https://github.com/sachin-in1/salesmngr_bot";
-
 bot.onText(/\/start/, (msg) => {
     bot.sendMessage(msg.chat.id, "Welcome " + msg.from.first_name);
 
@@ -30,8 +29,9 @@ bot.onText(/\/start/, (msg) => {
         if(element.user.is_bot==false && !(element.user.id  in premium) ){
             premium[element.user.id]=2
             }
+            
+        
     console.log("premium    :: ",premium);
-    //console.log(msg.text)
     }));
     });
 
@@ -45,8 +45,23 @@ bot.on('message', (msg) => {
         username[user] = msg.from.first_name
     }
     console.log(arr);
- 
-
+///////////////////////////////////////////////////////
+    let s=msg.entities;
+    if(s)
+    {
+        console.log("This is a command"); 
+        if(premium[user]==2)
+        {
+            console.log("Command Send by admin");
+        }
+        else
+        {
+            bot.sendMessage(msg.chat.id,"Warning: Only admin can send commands " + msg.from.first_name);
+        }
+    }
+else
+	console.log("Not command");
+///////////////////////////////////////////////////////  
     if(!(user in premium)){
         if(arr[user] ==3 && msg.text.indexOf("/start")!=0){
             
@@ -104,7 +119,7 @@ bot.on('message', (msg) => {
     //         });
     bot.onText(/\/premium/, (msg) =>{
             let ans = ""
-            console.log(msg);
+            //console.log(msg);
             if(msg.from.id in premium && msg.reply_to_message!=null){
                 if(premium[msg.from.id]==2 && msg.from.is_bot==false && !(msg.reply_to_message.from.id  in premium)){
                         premium[msg.reply_to_message.from.id]=1;
@@ -136,6 +151,7 @@ bot.on('message', (msg) => {
         });
         bot.sendMessage(msg.chat.id,ans)
     });
+    
     bot.onText(/\/unban/, (msg) =>{
         if(msg.from.id in premium && msg.reply_to_message!=null){
             if(premium[msg.from.id]==2 && msg.from.is_bot==false && !(msg.reply_to_message.from.id  in premium)){
@@ -164,4 +180,5 @@ bot.on('message', (msg) => {
                 bot.onText(/\/about/, (msg) => {
                     let ans = aboutMsg
                     bot.sendMessage(msg.chat.id,ans)
-                    });               
+                    });   
+               
