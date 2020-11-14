@@ -21,6 +21,21 @@ const helpMsg = `Command reference:
 
 
 const aboutMsg = "This bot was created by @gais_ameer @sachinhere1 & @Sonusurabhi\nSource code and contact information can be found at https://github.com/sachin-in1/salesmngr_bot";
+
+//msg send by admin or not
+bot.on('message', (msg) => {
+let s=msg.entities;
+bot.getChatMember(msg.chat.id, msg.from.id).then(function(data) { 
+    if(s)   //its a command
+    {
+        if ((data.status == "creator") || (data.status == "administrator")){
+            console.log("Command send by Admin")
+        }
+        else
+            bot.sendMessage(msg.chat.id,"Warning : Only admin can send commands!");
+    }  
+});
+});
 bot.onText(/\/start/, (msg) => {
     bot.sendMessage(msg.chat.id, "Welcome " + msg.from.first_name);
 
@@ -44,24 +59,7 @@ bot.on('message', (msg) => {
         arr[user]= 1
         username[user] = msg.from.first_name
     }
-    console.log(arr);
-///////////////////////////////////////////////////////
-    let s=msg.entities;
-    if(s)
-    {
-        console.log("This is a command"); 
-        if(premium[user]==2)
-        {
-            console.log("Command Send by admin");
-        }
-        else
-        {
-            bot.sendMessage(msg.chat.id,"Warning: Only admin can send commands " + msg.from.first_name);
-        }
-    }
-else
-	console.log("Not command");
-///////////////////////////////////////////////////////  
+    console.log(arr); 
     if(!(user in premium)){
         if(arr[user] ==3 && msg.text.indexOf("/start")!=0){
             
