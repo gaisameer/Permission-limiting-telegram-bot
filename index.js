@@ -24,18 +24,25 @@ const aboutMsg = "This bot was created by @gais_ameer @sachinhere1 & @Sonusurabh
 
 //msg send by admin or not
 bot.on('message', (msg) => {
-let s=msg.entities;
-bot.getChatMember(msg.chat.id, msg.from.id).then(function(data) { 
-    if(s)   //its a command
-    {
-        if ((data.status == "creator") || (data.status == "administrator")){
-            console.log("Command send by Admin")
-        }
-        else
-            bot.sendMessage(msg.chat.id,"Warning : Only admin can send commands!");
-    }  
 });
-});
+
+function checkadmin(msg){
+    let s=msg.entities;
+    bot.getChatMember(msg.chat.id, msg.from.id).then(function(data) { 
+        if(s && s[0].type === 'bot_command')   //its a command
+        {
+            if ((data.status == "creator") || (data.status == "administrator")){
+                console.log("Command send by Admin");
+                return true;
+                
+            }
+            else
+               { bot.sendMessage(msg.chat.id,"Warning : Only admin can send commands!");
+                 return false; }
+        }  
+    });
+}
+
 bot.onText(/\/start/, (msg) => {
     bot.sendMessage(msg.chat.id, "Welcome " + msg.from.first_name);
 
@@ -89,14 +96,14 @@ bot.on('message', (msg) => {
 
     bot.onText(/\/count/, (msg) => {
 
-        let ans = ""
-        //bot.sendMessage(msg.from.id,"Gais sent " + c + " messages.")
-        for(var key in arr){
-            console.log(key+" : " + username[key] + ":" + arr[key])
-            ans += username[key] + " : " + arr[key] + "\n"
+        if (checkadmin(msg)== true){
+            let ans = ""
+            for(var key in arr){
+                console.log(key+" : " + username[key] + ":" + arr[key])
+                ans += username[key] + " : " + arr[key] + "\n"
+            }
+            bot.sendMessage(msg.chat.id,ans)
         }
-        bot.sendMessage(msg.chat.id,ans)
-                
         });
     
     bot.onText(/\/cntall/, (msg) => {
