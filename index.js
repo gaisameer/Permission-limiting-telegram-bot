@@ -22,9 +22,7 @@ const helpMsg = `Command reference:
 
 const aboutMsg = "This bot was created by @gais_ameer @sachinhere1 & @Sonusurabhi\nSource code and contact information can be found at https://github.com/sachin-in1/salesmngr_bot";
 
-//msg send by admin or not
-bot.on('message', (msg) => {
-});
+
 
 function checkadmin(msg){
     let s=msg.entities;
@@ -37,14 +35,16 @@ function checkadmin(msg){
                 
             }
             else
-               { bot.sendMessage(msg.chat.id,"Warning : Only admin can send commands!");
+               { 
+                 console.log("Non admin command")
+                 bot.sendMessage(msg.chat.id,"Warning : Only admin can send commands!");
                  return false; }
         }  
     });
 }
 
 bot.onText(/\/start/, (msg) => {
-    bot.sendMessage(msg.chat.id, "Welcome " + msg.from.first_name);
+    bot.sendMessage(msg.chat.id, "bot started");
 
     bot.getChatAdministrators(msg.chat.id)
     .then(v=>v.forEach(element => {
@@ -96,14 +96,14 @@ bot.on('message', (msg) => {
 
     bot.onText(/\/count/, (msg) => {
 
-        if (checkadmin(msg)== true){
+        if (checkadmin(msg)==1){
             let ans = ""
             for(var key in arr){
                 console.log(key+" : " + username[key] + ":" + arr[key])
                 ans += username[key] + " : " + arr[key] + "\n"
             }
             bot.sendMessage(msg.chat.id,ans)
-        }
+    }
         });
     
     bot.onText(/\/cntall/, (msg) => {
