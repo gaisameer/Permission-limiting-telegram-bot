@@ -27,6 +27,16 @@ const helpMsg = `Command reference:
 
 const aboutMsg = "This bot was created by @gais_ameer @sachinhere1 & @Sonusurabhi\nSource code and contact information can be found at https://github.com/sachin-in1/salesmngr_bot";
 
+const current_info=Date.now()
+let time = new Date(current_info);
+// current hours
+let hours = time.getHours();console.log(hours)
+// current minutes
+let minutes = time.getMinutes();console.log(minutes)
+// current seconds
+let seconds = time.getSeconds();console.log(seconds)
+if(hours==12 && minutes==0 && seconds==0)
+    arr.clear()
 
 
 function checkadmin(msg){
