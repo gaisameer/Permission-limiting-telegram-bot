@@ -24,9 +24,16 @@ let arr = {}
 var premium = {}
 let username = {}
 
-cron.schedule('* 1 * * * *', function() {
+if(process.env.NODE_ENV !== 'production') {
+    cron.schedule('* * * * * *', function() {
+        console.log('---------------------');
+        d = new Date()
+        console.log(d.toTimeString())
+      });
+  }
+  
+cron.schedule('40 * * * *', function() {
     console.log('---------------------');
-    console.log('Running Cron Job');
     bot.sendMessage(315104882,"working hook?")
   });
 
