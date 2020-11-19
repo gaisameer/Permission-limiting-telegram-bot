@@ -15,6 +15,7 @@
     "moment": "^2.29.1",
     "mongoose": "^5.10.15",
     "ms": "^2.1.2",
+    "node-cron": "^2.0.3",
     "node-telegram-bot-api": "^0.50.0"
   }
 }
