@@ -100,7 +100,7 @@ bot.onText(/\/start/, (msg) => {
     }));
     
     //reading premium members from database
-    const users = member.find({},(err, docs)=>{
+    const users = member.find({groupId : msg.chat.id},(err, docs)=>{
         console.log(docs) 
         docs.forEach(user => {
             console.log(user.userId)
