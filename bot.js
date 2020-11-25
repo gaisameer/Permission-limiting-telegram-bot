@@ -1,9 +1,11 @@
 const cron = require('node-cron');
 const ms = require('ms')
 const express = require('express')
-require('./db')
-const member = require('./dbModel')
 const Bot = require('node-telegram-bot-api');
+
+require('./db/db')
+const member = require('./models/premiumMembers')       //model for keeping track of premium members
+const count = require('./models/messageCount')          //model for keeping track of message count
 
 
 let bot;
@@ -120,10 +122,19 @@ bot.on('message', (msg) => {
     //console.log(msg.chat.id)
     if(user in arr){
         arr[user] += 1
+        var Count = count.findOne({userId : msg.from.id, groupId : msg.chat.id })
+        Count.count += 1
+        Count.save()
     }
     else {
         arr[user]= 1
         username[user] = msg.from.first_name
+        var Count = new count({
+            userId : msg.from.id,
+            groupId : msg.chat.id,
+            count : 1
+        })
+        Count.save()
     }
     console.log(arr); 
     if(!(user in premium)){

@@ -14,6 +14,6 @@ const botSchema = mongoose.Schema({
     timestamps : true
 })
 
-const BotDb = mongoose.model('bot',botSchema)
+const BotDb = mongoose.model('botCount',botSchema)
 
 module.exports = BotDb
