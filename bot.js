@@ -5,7 +5,7 @@ const Bot = require('node-telegram-bot-api');
 
 require('./db/db')
 const member = require('./models/premiumMembers')       //model for keeping track of premium members
-const count = require('./models/messageCount')          //model for keeping track of message count
+const counter = require('./models/messageCount')          //model for keeping track of message count
 
 
 let bot;
@@ -120,22 +120,31 @@ bot.onText(/\/start/, (msg) => {
 //counter increase + block
 bot.on('message', (msg) => {
     user = msg.from.id;   
-    //console.log(msg.chat.id)
+    
     if(user in arr){
         arr[user] += 1
-        // var Count = count.findOne({userId : msg.from.id, groupId : msg.chat.id })
-        // Count.count += 1
-        // Count.save()
+         counter.findOne({userId : msg.from.id },(err,res)=>{
+             if(err){
+                 console.log('failed')
+             }
+             else{
+                 console.log(res.count)
+                 res.count +=1
+                 res.save()
+             }
+         })
+        
     }
     else {
         arr[user]= 1
         username[user] = msg.from.first_name
-        var Count = new count({
+        var Count = new counter({
             userId : msg.from.id,
             groupId : msg.chat.id,
             count : 1
         })
         Count.save()
+       // console.log(Count.userId)
     }
     console.log(arr); 
     if(!(user in premium)){
