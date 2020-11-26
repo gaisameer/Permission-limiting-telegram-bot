@@ -1,4 +1,4 @@
-const cron = require('node-cron');
+//const cron = require('node-cron');
 const ms = require('ms')
 const express = require('express')
 const Bot = require('node-telegram-bot-api');
@@ -12,15 +12,16 @@ let bot;
 const app = express()
 app.use(express.json())
 const token = process.env.TOKEN;
+bot = new Bot(token, { polling: true });
 
 //start the bot
-if(process.env.NODE_ENV === 'production') {
-  bot = new Bot(token);
-  bot.setWebHook(process.env.HEROKU_URL + bot.token);
-}
-else {
-  bot = new Bot(token, { polling: true });
-}
+// if(process.env.NODE_ENV === 'production') {
+//   bot = new Bot(token);
+//   bot.setWebHook(process.env.HEROKU_URL + bot.token);
+// }
+// else {
+//   bot = new Bot(token, { polling: true });
+// }
 
 
 
@@ -31,11 +32,11 @@ var premium = {}
 let username = {}
 
 if(process.env.NODE_ENV !== 'production') {
-    cron.schedule('* * * * * *', function() {
-        console.log('---------------------');
-        d = new Date()
-        console.log(d.toTimeString())
-      });
+    // cron.schedule('* * * * * *', function() {
+    //     console.log('---------------------');
+    //     d = new Date()
+    //     console.log(d.toTimeString())
+    //   });
   }
 
 
@@ -122,9 +123,9 @@ bot.on('message', (msg) => {
     //console.log(msg.chat.id)
     if(user in arr){
         arr[user] += 1
-        var Count = count.findOne({userId : msg.from.id, groupId : msg.chat.id })
-        Count.count += 1
-        Count.save()
+        // var Count = count.findOne({userId : msg.from.id, groupId : msg.chat.id })
+        // Count.count += 1
+        // Count.save()
     }
     else {
         arr[user]= 1

@@ -20,6 +20,6 @@ const countSchema = mongoose.Schema({
     timestamps : true
 })
 
-const CountDb = mongoose.model('botPremium',countSchema)
+const CountDb = mongoose.model('botCount',countSchema)
 
 module.exports = CountDb
