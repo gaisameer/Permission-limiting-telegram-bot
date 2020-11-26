@@ -31,15 +31,6 @@ let arr = {}
 var premium = {}
 let username = {}
 
-if(process.env.NODE_ENV !== 'production') {
-    // cron.schedule('* * * * * *', function() {
-    //     console.log('---------------------');
-    //     d = new Date()
-    //     console.log(d.toTimeString())
-    //   });
-  }
-
-
 
 //const messages
 const helpMsg = `Command reference:
@@ -271,7 +262,15 @@ bot.onText(/\/unban/, (msg) =>{
                     can_pin_messages:true});
                     arr[msg.reply_to_message.from.id]=0;
             }}})
-
+//remove from premium    
+    bot.onText(/\/remove/, (msg) =>{
+    if(msg.from.id in premium && msg.reply_to_message!=null){
+        if(premium[msg.from.id]==2 && msg.from.is_bot==false && (msg.reply_to_message.from.id  in premium)){
+                member.deleteOne({userId : msg.reply_to_message.from.id ,groupId : msg.chat.id},(err, docs)=>{
+        console.log(docs)
+        delete premium[msg.reply_to_message.from.id];
+     })
+            }}})
 
 //help command
 bot.onText(/\/help/, (msg) => {
