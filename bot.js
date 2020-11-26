@@ -53,8 +53,17 @@ let time = new Date(current_info);
 let hours = time.getHours();console.log(hours)
 let minutes = time.getMinutes();console.log(minutes)
 let seconds = time.getSeconds();console.log(seconds)
-if(hours==12 && minutes==0 && seconds==0)
+if(hours==12 && minutes==00 && seconds==0) {
+    console.log('clearing counts')
     arr.clear()
+
+    counter.deleteMany({}).then((res)=>{
+        console.log('counter db cleared at midnight')
+    }).catch((err)=>{
+        console.log('clearing db at midnight failed')
+    })
+    
+    }
 
 
 
@@ -158,12 +167,8 @@ bot.on('message', (msg) => {
                 }catch(e){
                     console.log("cant remove admin")
                 }
-            
-
         }
-
     }
-
 })
 
     
@@ -262,6 +267,7 @@ bot.onText(/\/unban/, (msg) =>{
                     can_pin_messages:true});
                     arr[msg.reply_to_message.from.id]=0;
             }}})
+
 //remove from premium    
     bot.onText(/\/remove/, (msg) =>{
     if(msg.from.id in premium && msg.reply_to_message!=null){
@@ -269,6 +275,13 @@ bot.onText(/\/unban/, (msg) =>{
                 member.deleteOne({userId : msg.reply_to_message.from.id ,groupId : msg.chat.id},(err, docs)=>{
         console.log(docs)
         delete premium[msg.reply_to_message.from.id];
+        member.deleteOne({ userId : msg.reply_to_message.from.id , groupId : msg.chat.id}, (err,res)=>{
+            if(err){
+                console.log('Failed to remove from premium member db.')
+            }else{
+                console.log('Removed from premium member db.')
+            }
+        })
      })
             }}})
 
