@@ -2,7 +2,7 @@
 const ms = require('ms')
 const express = require('express')
 const Bot = require('node-telegram-bot-api');
-
+var schedule = require('node-schedule');
 require('./db/db')
 const member = require('./models/premiumMembers')       //model for keeping track of premium members
 const counter = require('./models/messageCount')          //model for keeping track of message count
@@ -44,27 +44,16 @@ const helpMsg = `Command reference:
 
 const aboutMsg = "This bot was created by @gais_ameer @sachinhere1 & @Sonusurabhi\nSource code and contact information can be found at https://github.com/sachin-in1/salesmngr_bot";
 
-
-
 //counter reset logic
-
-const current_info=Date.now()
-let time = new Date(current_info);
-let hours = time.getHours();console.log(hours)
-let minutes = time.getMinutes();console.log(minutes)
-let seconds = time.getSeconds();console.log(seconds)
-if(hours==12 && minutes==00 && seconds==0) {
-    console.log('clearing counts')
-    arr.clear()
-
+var j = schedule.scheduleJob({hour: 0, minute: 0}, function(){
+    console.log('counter reset!');
+    arr=[]
     counter.deleteMany({}).then((res)=>{
         console.log('counter db cleared at midnight')
     }).catch((err)=>{
         console.log('clearing db at midnight failed')
     })
-    
-    }
-
+  });
 
 
 //admin check
@@ -184,20 +173,6 @@ bot.onText(/\/count/, (msg) => {
         bot.sendMessage(msg.chat.id,ans)
     }
     });
-//showing all count
-// bot.onText(/\/cntall/, (msg) => {
-//         console.log(arr);
-//         let ans = ""
-//         for(var key in arr){
-//             console.log(key+" : " + arr[key])
-//             ans += "@"+msg.from.username + " : " + arr[key] + "\n"
-//         };
-//         bot.sendMessage(msg.chat.id,ans)
-                
-//         });
-
-
-
 //make someone premium
 bot.onText(/\/premium/, (msg) =>{
         let ans = ""
@@ -266,6 +241,14 @@ bot.onText(/\/unban/, (msg) =>{
                     can_change_info:true,
                     can_pin_messages:true});
                     arr[msg.reply_to_message.from.id]=0;
+                    counter.deleteMany({ userId : msg.reply_to_message.from.id , groupId : msg.chat.id}, (err,res)=>{
+                        if(err){
+                            console.log('Failed to clear counter db')
+                        }else{
+                            console.log('clear counter db')
+                        }
+                    })
+
             }}})
 
 //remove from premium    
