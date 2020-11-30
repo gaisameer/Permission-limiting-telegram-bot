@@ -14,14 +14,6 @@ app.use(express.json())
 const token = process.env.TOKEN;
 bot = new Bot(token, { polling: true });
 
-//start the bot
-// if(process.env.NODE_ENV === 'production') {
-//   bot = new Bot(token);
-//   bot.setWebHook(process.env.HEROKU_URL + bot.token);
-// }
-// else {
-//   bot = new Bot(token, { polling: true });
-// }
 
 
 
@@ -139,8 +131,7 @@ bot.on('message', (msg) => {
     if(!(user in premium)){
         if(arr[user] ==3 && msg.text.indexOf("/start")!=0){
             
-            try{
-            var d5 = bot.restrictChatMember(msg.chat.id,
+             bot.restrictChatMember(msg.chat.id,
                 msg.from.id,                           
                 {
                 can_invite_users:false,
@@ -151,11 +142,13 @@ bot.on('message', (msg) => {
                 can_add_web_page_previews:false,
                 can_change_info:false,
                 can_pin_messages:false,
-                until_date:Math.round((Date.now() + ms("1 days"))/1000)});
+                until_date:Math.round((Date.now() + ms("1 days"))/1000)}).then(()=>{
+                    console.log(msg.chat.id + 'banned for 24 hrs')
+                }).catch((e)=>{
+                    console.log("cant ban admin")
+                })
             
-                }catch(e){
-                    console.log("cant remove admin")
-                }
+                
         }
     }
 })
@@ -185,7 +178,7 @@ bot.onText(/\/premium/, (msg) =>{
             bot.sendMessage(msg.chat.id,ans)
             console.log("Premium : ",premium);
             //unban 
-            var d5 = bot.restrictChatMember(msg.chat.id,
+             bot.restrictChatMember(msg.chat.id,
                 msg.reply_to_message.from.id,
                 {
                 can_invite_users:true,
@@ -195,7 +188,11 @@ bot.onText(/\/premium/, (msg) =>{
                 can_send_other_messages:true,
                 can_add_web_page_previews:true,
                 can_change_info:true,
-                can_pin_messages:true});
+                can_pin_messages:true}).then(()=>{
+                    console.log('member ban lifted by admin..')
+                }).catch((e)=>{
+                    console.log('failed to lift ban..')
+                })
                 arr[msg.reply_to_message.from.id]=0;
             }
 
@@ -240,8 +237,10 @@ bot.onText(/\/unban/, (msg) =>{
                     can_add_web_page_previews:true,
                     can_change_info:true,
                     can_pin_messages:true});
-                    arr[msg.reply_to_message.from.id]=0;
-                    counter.deleteMany({ userId : msg.reply_to_message.from.id , groupId : msg.chat.id}, (err,res)=>{
+                    var value = msg.reply_to_message.from.id
+                   delete arr.value
+                   console.log(value , arr)
+                    counter.deleteOne({ userId : msg.reply_to_message.from.id , groupId : msg.chat.id}, (err,res)=>{
                         if(err){
                             console.log('Failed to clear counter db')
                         }else{
