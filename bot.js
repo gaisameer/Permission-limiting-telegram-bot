@@ -104,12 +104,12 @@ bot.on('message', (msg) => {
     
     if(user in arr){
         arr[user] += 1
-         counter.findOne({userId : msg.from.id },(err,res)=>{
+         counter.findOne({userId : msg.from.id ,groupId : msg.chat.id },(err,res)=>{
              if(err){
                  console.log('failed')
              }
              else{
-                 console.log(res.count)
+                 //console.log(res.count)
                  res.count +=1
                  res.save()
              }
@@ -118,7 +118,7 @@ bot.on('message', (msg) => {
     }
     else {
         arr[user]= 1
-        username[user] = msg.from.first_name
+        //username[user] = msg.from.first_name
         var Count = new counter({
             userId : msg.from.id,
             groupId : msg.chat.id,
@@ -189,7 +189,7 @@ bot.onText(/\/premium/, (msg) =>{
                 can_add_web_page_previews:true,
                 can_change_info:true,
                 can_pin_messages:true}).then(()=>{
-                    console.log('member ban lifted by admin..')
+                    console.log('member ban lifted by admin ..')
                 }).catch((e)=>{
                     console.log('failed to lift ban..')
                 })
