@@ -14,14 +14,6 @@ app.use(express.json())
 const token = process.env.TOKEN;
 bot = new Bot(token, { polling: true });
 
-//start the bot
-// if(process.env.NODE_ENV === 'production') {
-//   bot = new Bot(token);
-//   bot.setWebHook(process.env.HEROKU_URL + bot.token);
-// }
-// else {
-//   bot = new Bot(token, { polling: true });
-// }
 
 
 
@@ -109,10 +101,12 @@ bot.on('message', (msg) => {
     
     if(user in arr){
         arr[user] += 1
-         counter.findOne({userId : msg.from.id },(err,res)=>{
+         counter.findOne({userId : msg.from.id ,groupId : msg.chat.id},(err,res)=>{
              if(err){
                  console.log('failed')
              }
+             if(!res)
+                console.log("user in arr,but not in db")
              else{
                  console.log(res.count)
                  res.count +=1
@@ -122,15 +116,16 @@ bot.on('message', (msg) => {
         
     }
     else {
+        console.log("user is new..not in array")
         arr[user]= 1
-        username[user] = msg.from.first_name
+        //username[user] = msg.from.first_name
         var Count = new counter({
             userId : msg.from.id,
             groupId : msg.chat.id,
             count : 1
         })
         Count.save()
-       // console.log(Count.userId)
+       console.log("user added into db")
     }
     console.log(arr); 
     if(!(msg.chat.id in premium)){
@@ -139,8 +134,7 @@ bot.on('message', (msg) => {
     if(!(user in premium[msg.chat.id])){
         if(arr[user] ==3 && msg.text.indexOf("/start")!=0){
             
-            try{
-            var d5 = bot.restrictChatMember(msg.chat.id,
+             bot.restrictChatMember(msg.chat.id,
                 msg.from.id,                           
                 {
                 can_invite_users:false,
@@ -151,11 +145,13 @@ bot.on('message', (msg) => {
                 can_add_web_page_previews:false,
                 can_change_info:false,
                 can_pin_messages:false,
-                until_date:Math.round((Date.now() + ms("1 days"))/1000)});
+                until_date:Math.round((Date.now() + ms("1 days"))/1000)}).then(()=>{
+                    console.log(msg.chat.id + 'banned for 24 hrs')
+                }).catch((e)=>{
+                    console.log("cant ban admin")
+                })
             
-                }catch(e){
-                    console.log("cant remove admin")
-                }
+                
         }
     }
 })
@@ -188,7 +184,7 @@ bot.onText(/\/premium/, (msg) =>{
             bot.sendMessage(msg.chat.id,ans)
             console.log("Premium : ",premium);
             //unban 
-            var d5 = bot.restrictChatMember(msg.chat.id,
+             bot.restrictChatMember(msg.chat.id,
                 msg.reply_to_message.from.id,
                 {
                 can_invite_users:true,
@@ -198,8 +194,21 @@ bot.onText(/\/premium/, (msg) =>{
                 can_send_other_messages:true,
                 can_add_web_page_previews:true,
                 can_change_info:true,
-                can_pin_messages:true});
-                arr[msg.reply_to_message.from.id]=0;
+                can_pin_messages:true}).then(()=>{
+                    console.log('member ban lifted by admin..from premium function')
+                }).catch((e)=>{
+                    console.log('failed to lift ban..from premium function')
+                })
+                var value = msg.reply_to_message.from.id
+                   delete arr.value
+                   console.log(value , arr)
+                    counter.deleteOne({ userId : msg.reply_to_message.from.id , groupId : msg.chat.id}, (err,res)=>{
+                        if(err){
+                            console.log('Failed to clear counter db..from premium function')
+                        }else{
+                            console.log('clear counter db..from premium function')
+                        }
+                    })
             }
 
             var user = new member({
@@ -211,7 +220,7 @@ bot.onText(/\/premium/, (msg) =>{
                     console.log("saved to db :",user)
             }
             catch(e){
-                console.log(e)
+                console.log("failed to save preium member to db")
             }
 
 
@@ -260,12 +269,14 @@ bot.onText(/\/unban/, (msg) =>{
                     can_add_web_page_previews:true,
                     can_change_info:true,
                     can_pin_messages:true});
-                    arr[msg.reply_to_message.from.id]=0;
-                    counter.deleteMany({ userId : msg.reply_to_message.from.id , groupId : msg.chat.id}, (err,res)=>{
+                    delete arr[msg.reply_to_message.from.id];
+                    if(msg.reply_to_message.from.id in arr)
+                        console.log("error value not deleted from array")
+                    counter.deleteOne({ userId : msg.reply_to_message.from.id , groupId : msg.chat.id}, (err,res)=>{
                         if(err){
-                            console.log('Failed to clear counter db')
+                            console.log('Failed to clear counter db from unban')
                         }else{
-                            console.log('clear counter db')
+                            console.log('clear counter db from unban')
                         }
                     })
 
@@ -275,9 +286,13 @@ bot.onText(/\/unban/, (msg) =>{
     bot.onText(/\/remove/, (msg) =>{
     if(msg.from.id in premium[msg.chat.id] && msg.reply_to_message!=null){
         if(premium[msg.chat.id][msg.from.id]==2 && msg.from.is_bot==false && (msg.reply_to_message.from.id  in premium[msg.chat.id])){
-                member.deleteOne({userId : msg.reply_to_message.from.id ,groupId : msg.chat.id},(err, docs)=>{
-        console.log(docs)
+        
+        delete arr[msg.reply_to_message.from.id];       
         delete premium[msg.chat.id][msg.reply_to_message.from.id];
+        if(msg.reply_to_message.from.id in premium[msg.chat.id])
+            console.log("not reomved from premium")
+        else
+            console.log("removed from premium")
         member.deleteOne({ userId : msg.reply_to_message.from.id , groupId : msg.chat.id}, (err,res)=>{
             if(err){
                 console.log('Failed to remove from premium member db.')
@@ -285,7 +300,7 @@ bot.onText(/\/unban/, (msg) =>{
                 console.log('Removed from premium member db.')
             }
         })
-     })
+     
             }}})
 
 //help command
