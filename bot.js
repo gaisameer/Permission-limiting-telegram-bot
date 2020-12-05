@@ -62,9 +62,10 @@ async function checkadmin(msg){
                { 
                  console.log("Non admin command")
                  bot.sendMessage(msg.chat.id,"Warning : Only admin can send commands!");
-                 ret = false; }
+                 ret = false; 
+                }
 
-           // return ret
+
         }  
     });
     //await console.log(ret)
@@ -172,21 +173,21 @@ bot.on('message', (msg) => {
 
     
 //showing count
-bot.onText(/\/count/, (msg) => {
+bot.onText(/\/count/, async(msg) => {
     //console.log(checkadmin(msg),"hi")
-    
+    if(await checkadmin(msg)){
         let ans = ""
         for(var key in arr){
             console.log(key + ":" + arr[key])
             ans += key + " : " + arr[key] + "\n"
         }
         bot.sendMessage(msg.chat.id,ans)
-
+    }
     });
 //make someone premium
-bot.onText(/\/premium/, (msg) =>{
+bot.onText(/\/premium/, async(msg) =>{
        
-    if(checkadmin(msg)){
+    if(await checkadmin(msg)){
         let ans = ""
         if(msg.from.id in premium && msg.reply_to_message!=null){
             if(premium[msg.from.id]==2 && msg.from.is_bot==false && !(msg.reply_to_message.from.id  in premium)){
@@ -231,9 +232,9 @@ bot.onText(/\/premium/, (msg) =>{
         });
 
 //view who is premium
-bot.onText(/\/view/, (msg) =>{
+bot.onText(/\/view/, async(msg) =>{
     
-    if(checkadmin(msg)){    
+    if(await checkadmin(msg)){    
         if(checkadmin(msg)){
             let ans = "Prime Members:\n"
             a = Object.keys(premium)
@@ -247,8 +248,8 @@ bot.onText(/\/view/, (msg) =>{
 
 
 //unban logic
-bot.onText(/\/unban/, (msg) =>{
-    if(checkadmin(msg)){
+bot.onText(/\/unban/, async(msg) =>{
+    if(await checkadmin(msg)){
     if(msg.from.id in premium && msg.reply_to_message!=null){
         if(premium[msg.from.id]==2 && msg.from.is_bot==false && !(msg.reply_to_message.from.id  in premium)){
                 var d5 = bot.restrictChatMember(msg.chat.id,
@@ -278,8 +279,8 @@ bot.onText(/\/unban/, (msg) =>{
         })
 
 //remove from premium    
-    bot.onText(/\/remove/, (msg) =>{
-        if(checkadmin(msg)){
+    bot.onText(/\/remove/, async(msg) =>{
+        if(await checkadmin(msg)){
         if(msg.from.id in premium && msg.reply_to_message!=null){
         if(premium[msg.from.id]==2 && msg.from.is_bot==false && (msg.reply_to_message.from.id  in premium)){
                 member.deleteOne({userId : msg.reply_to_message.from.id ,groupId : msg.chat.id},(err, docs)=>{
@@ -310,7 +311,7 @@ bot.onText(/\/help/, async(msg) => {
 bot.onText(/\/about/, async(msg) => {
     
     if(await checkadmin(msg)){
-        console.log(val,"val")
+        //console.log(val,"val")
         let ans = aboutMsg
         bot.sendMessage(msg.chat.id,ans)
     }
