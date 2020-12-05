@@ -50,9 +50,8 @@ var j = schedule.scheduleJob({hour: 0, minute: 0}, function(){
 
 //admin check
 function checkadmin(msg){
-    let s=msg.entities;
+
     bot.getChatMember(msg.chat.id, msg.from.id).then(function(data) { 
-        if(s && s[0].type === 'bot_command')   //its a command
         {
             if ((data.status == "creator") || (data.status == "administrator")){
                 console.log("Command send by Admin");
@@ -72,22 +71,32 @@ function checkadmin(msg){
 //start command
 bot.onText(/\/start/, (msg) => {
     bot.sendMessage(msg.chat.id, "bot started");
-
+  
 
     //getting admins
     bot.getChatAdministrators(msg.chat.id)
-    .then(v=>v.forEach(element => {
-        if(element.user.is_bot==false && !(element.user.id  in premium) ){
-            premium[element.user.id]=2
-            }   
+    .then((v)=>
+       { v.forEach(element => {
+            if(element.user.is_bot==false && !(element.user.id  in premium) ){
+                premium[element.user.id]=2
+                }   
+        })
     console.log("premium    :: ",premium);
-    }));
+    });
     
+    //reading count from db
+    counter.find({groupId : msg.chat.id}).then((docs)=>{
+        docs.forEach(user => {
+            console.log("adding count of " + user.count + " to " + user.userId)
+            arr[user.userId] = user.count
+        })
+    })
+
     //reading premium members from database
     const users = member.find({groupId : msg.chat.id},(err, docs)=>{
-        console.log(docs) 
+        //console.log(docs) 
         docs.forEach(user => {
-            console.log(user.userId)
+            //console.log(user.userId)
             if(!(user.userId  in premium) ){
                 premium[user.userId]=1
                 }
@@ -102,32 +111,34 @@ bot.onText(/\/start/, (msg) => {
 bot.on('message', (msg) => {
     user = msg.from.id;   
     
-    if(user in arr){
+    if(msg.text.indexOf("/start")!=0) {
+        if(user in arr){
         arr[user] += 1
          counter.findOne({userId : msg.from.id ,groupId : msg.chat.id },(err,res)=>{
              if(err){
                  console.log('failed')
              }
              else{
-                 //console.log(res.count)
+                // console.log(res)
                  res.count +=1
                  res.save()
              }
          })
         
-    }
-    else {
-        arr[user]= 1
-        //username[user] = msg.from.first_name
-        var Count = new counter({
-            userId : msg.from.id,
-            groupId : msg.chat.id,
-            count : 1
-        })
-        Count.save()
-       // console.log(Count.userId)
-    }
-    console.log(arr); 
+        }
+        else {
+            arr[user]= 1
+            //username[user] = msg.from.first_name
+            var Count = new counter({
+                userId : msg.from.id,
+                groupId : msg.chat.id,
+                count : 1
+            })
+            Count.save()
+        // console.log(Count.userId)
+        }
+    
+    console.log("messag count  :: ",arr); 
     if(!(user in premium)){
         if(arr[user] ==3 && msg.text.indexOf("/start")!=0){
             
@@ -150,6 +161,7 @@ bot.on('message', (msg) => {
             
                 
         }
+    }
     }
 })
 
@@ -213,12 +225,14 @@ bot.onText(/\/premium/, (msg) =>{
 
 //view who is premium
 bot.onText(/\/view/, (msg) =>{
-    let ans = "Prime Members:\n"
-    a = Object.keys(premium)
-    a.forEach(element => {
-        ans+=element+"\n"
-    });
-    bot.sendMessage(msg.chat.id,ans)
+    if(checkadmin(msg)){
+        let ans = "Prime Members:\n"
+        a = Object.keys(premium)
+        a.forEach(element => {
+            ans+=element+"\n"
+        });
+        bot.sendMessage(msg.chat.id,ans)
+    }
 });
 
 
