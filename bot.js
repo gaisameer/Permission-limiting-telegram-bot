@@ -15,13 +15,14 @@ const token = process.env.TOKEN;
 bot = new Bot(token, { polling: true });
 
 
-bot.on("polling_error", (err) => console.log(err));
+
 
 //declare data
 let c = 0
 let arr = {}
 var premium = {}
 let username = {}
+
 
 //const messages
 const helpMsg = `Command reference:
@@ -49,9 +50,10 @@ var j = schedule.scheduleJob({hour: 0, minute: 0}, function(){
 
 //admin check
 function checkadmin(msg){
-    
+    let s=msg.entities;
     bot.getChatMember(msg.chat.id, msg.from.id).then(function(data) { 
-        
+        if(s && s[0].type === 'bot_command')   //its a command
+        {
             if ((data.status == "creator") || (data.status == "administrator")){
                 console.log("Command send by Admin");
                 return true;
@@ -62,26 +64,21 @@ function checkadmin(msg){
                  console.log("Non admin command")
                  bot.sendMessage(msg.chat.id,"Warning : Only admin can send commands!");
                  return false; }
-          
+        }  
     });
 }
-
-
-
-
 
 
 //start command
 bot.onText(/\/start/, (msg) => {
     bot.sendMessage(msg.chat.id, "bot started");
 
-    premium[msg.chat.id]={}
 
     //getting admins
     bot.getChatAdministrators(msg.chat.id)
     .then(v=>v.forEach(element => {
-        if(element.user.is_bot==false && !(element.user.id  in premium[msg.chat.id]) ){
-            premium[msg.chat.id][element.user.id]=2
+        if(element.user.is_bot==false && !(element.user.id  in premium) ){
+            premium[element.user.id]=2
             }   
     console.log("premium    :: ",premium);
     }));
@@ -92,7 +89,7 @@ bot.onText(/\/start/, (msg) => {
         docs.forEach(user => {
             console.log(user.userId)
             if(!(user.userId  in premium) ){
-                premium[user.groupId][user.userId]=1
+                premium[user.userId]=1
                 }
         })
      })
@@ -107,12 +104,10 @@ bot.on('message', (msg) => {
     
     if(user in arr){
         arr[user] += 1
-         counter.findOne({userId : msg.from.id ,groupId : msg.chat.id},(err,res)=>{
+         counter.findOne({userId : msg.from.id ,groupId : msg.chat.id },(err,res)=>{
              if(err){
                  console.log('failed')
              }
-             if(!res)
-                console.log("user in arr,but not in db")
              else{
                  //console.log(res.count)
                  res.count +=1
@@ -122,7 +117,6 @@ bot.on('message', (msg) => {
         
     }
     else {
-        console.log("user is new..not in array")
         arr[user]= 1
         //username[user] = msg.from.first_name
         var Count = new counter({
@@ -131,13 +125,10 @@ bot.on('message', (msg) => {
             count : 1
         })
         Count.save()
-       console.log("user added into db")
+       // console.log(Count.userId)
     }
     console.log(arr); 
-    if(!(msg.chat.id in premium)){
-        premium[msg.chat.id]={}
-    }
-    if(!(user in premium[msg.chat.id])){
+    if(!(user in premium)){
         if(arr[user] ==3 && msg.text.indexOf("/start")!=0){
             
              bot.restrictChatMember(msg.chat.id,
@@ -165,8 +156,8 @@ bot.on('message', (msg) => {
     
 //showing count
 bot.onText(/\/count/, (msg) => {
-    var a = checkadmin(msg);
-    if (a){
+
+    if (checkadmin(msg)==true){
         let ans = ""
         for(var key in arr){
             console.log(key+" : " + username[key] + ":" + arr[key])
@@ -174,15 +165,12 @@ bot.onText(/\/count/, (msg) => {
         }
         bot.sendMessage(msg.chat.id,ans)
     }
-    else{
-        bot.sendMessage(msg.chat.id,"Warning : Only admin can send commands!");
-    }
     });
 //make someone premium
 bot.onText(/\/premium/, (msg) =>{
         let ans = ""
-        if(msg.from.id in premium[msg.chat.id] && msg.reply_to_message!=null){
-            if(premium[msg.chat.id][msg.from.id]==2 && msg.from.is_bot==false && !(msg.reply_to_message.from.id  in premium[msg.chat.id])){
+        if(msg.from.id in premium && msg.reply_to_message!=null){
+            if(premium[msg.from.id]==2 && msg.from.is_bot==false && !(msg.reply_to_message.from.id  in premium)){
                     premium[msg.reply_to_message.from.id]=1;
                     }
             ans +=msg.reply_to_message.from.first_name+" "+msg.reply_to_message.from.last_name +" was added to premium"
@@ -201,20 +189,11 @@ bot.onText(/\/premium/, (msg) =>{
                 can_add_web_page_previews:true,
                 can_change_info:true,
                 can_pin_messages:true}).then(()=>{
-                    console.log('member ban lifted by admin..from premium function')
+                    console.log('member ban lifted by admin ..')
                 }).catch((e)=>{
-                    console.log('failed to lift ban..from premium function')
+                    console.log('failed to lift ban..')
                 })
-                var value = msg.reply_to_message.from.id
-                   delete arr.value
-                   console.log(value , arr)
-                    counter.deleteOne({ userId : msg.reply_to_message.from.id , groupId : msg.chat.id}, (err,res)=>{
-                        if(err){
-                            console.log('Failed to clear counter db..from premium function')
-                        }else{
-                            console.log('clear counter db..from premium function')
-                        }
-                    })
+                arr[msg.reply_to_message.from.id]=0;
             }
 
             var user = new member({
@@ -226,44 +205,27 @@ bot.onText(/\/premium/, (msg) =>{
                     console.log("saved to db :",user)
             }
             catch(e){
-                console.log("failed to save preium member to db")
+                console.log(e)
             }
 
 
         });
 
 //view who is premium
-// bot.onText(/\/view/, (msg) =>{
-//     bot.getChatMember(msg.chat.id, msg.from.id).then((data)=>{
-//         if ((data.status == "creator") || (data.status == "administrator")){
-//         a = true
-//         console.log("Command send by Admin");
-//     }
-//     else
-//        { 
-//          a = false; 
-//          console.log("Non admin command")
-//         }
-//         return a;
-//     })
-//     if(a){
-//         let ans = "Prime Members:\n"
-//         a = Object.keys(premium[msg.chat.id])
-//         a.forEach(element => {
-//             ans+=element+"\n"
-//         });
-//         bot.sendMessage(msg.chat.id,ans)
-//     }
-//     else{
-//         bot.sendMessage(msg.chat.id,"Warning : Only admin can send commands!");
-//     }
-// });
+bot.onText(/\/view/, (msg) =>{
+    let ans = "Prime Members:\n"
+    a = Object.keys(premium)
+    a.forEach(element => {
+        ans+=element+"\n"
+    });
+    bot.sendMessage(msg.chat.id,ans)
+});
 
 
 //unban logic
 bot.onText(/\/unban/, (msg) =>{
     if(msg.from.id in premium && msg.reply_to_message!=null){
-        if(premium[msg.chat.id][msg.from.id]==2 && msg.from.is_bot==false && !(msg.reply_to_message.from.id  in premium[msg.chat.id])){
+        if(premium[msg.from.id]==2 && msg.from.is_bot==false && !(msg.reply_to_message.from.id  in premium)){
                 var d5 = bot.restrictChatMember(msg.chat.id,
                     msg.reply_to_message.from.id,                          
                     {
@@ -275,14 +237,14 @@ bot.onText(/\/unban/, (msg) =>{
                     can_add_web_page_previews:true,
                     can_change_info:true,
                     can_pin_messages:true});
-                    delete arr[msg.reply_to_message.from.id];
-                    if(msg.reply_to_message.from.id in arr)
-                        console.log("error value not deleted from array")
+                    var value = msg.reply_to_message.from.id
+                   delete arr.value
+                   console.log(value , arr)
                     counter.deleteOne({ userId : msg.reply_to_message.from.id , groupId : msg.chat.id}, (err,res)=>{
                         if(err){
-                            console.log('Failed to clear counter db from unban')
+                            console.log('Failed to clear counter db')
                         }else{
-                            console.log('clear counter db from unban')
+                            console.log('clear counter db')
                         }
                     })
 
@@ -290,15 +252,11 @@ bot.onText(/\/unban/, (msg) =>{
 
 //remove from premium    
     bot.onText(/\/remove/, (msg) =>{
-    if(msg.from.id in premium[msg.chat.id] && msg.reply_to_message!=null){
-        if(premium[msg.chat.id][msg.from.id]==2 && msg.from.is_bot==false && (msg.reply_to_message.from.id  in premium[msg.chat.id])){
-        
-        delete arr[msg.reply_to_message.from.id];       
-        delete premium[msg.chat.id][msg.reply_to_message.from.id];
-        if(msg.reply_to_message.from.id in premium[msg.chat.id])
-            console.log("not reomved from premium")
-        else
-            console.log("removed from premium")
+    if(msg.from.id in premium && msg.reply_to_message!=null){
+        if(premium[msg.from.id]==2 && msg.from.is_bot==false && (msg.reply_to_message.from.id  in premium)){
+                member.deleteOne({userId : msg.reply_to_message.from.id ,groupId : msg.chat.id},(err, docs)=>{
+        console.log(docs)
+        delete premium[msg.reply_to_message.from.id];
         member.deleteOne({ userId : msg.reply_to_message.from.id , groupId : msg.chat.id}, (err,res)=>{
             if(err){
                 console.log('Failed to remove from premium member db.')
@@ -306,7 +264,7 @@ bot.onText(/\/unban/, (msg) =>{
                 console.log('Removed from premium member db.')
             }
         })
-     
+     })
             }}})
 
 //help command
@@ -320,28 +278,4 @@ bot.onText(/\/about/, (msg) => {
     bot.sendMessage(msg.chat.id,ans)
     });   
 
-
-
-
-
-    bot.onText(/\/view/, (msg) =>{
-        
-        if(checkadmin(msg)){
-            let ans = "Prime Members:\n"
-            a = Object.keys(premium[msg.chat.id])
-            a.forEach(element => {
-                ans+=element+"\n"
-            });
-            bot.sendMessage(msg.chat.id,ans)
-        }
-        else{
-            bot.sendMessage(msg.chat.id,"Warning : Only admin can send commands!");
-        }
-    });
-
-
-
 module.exports = bot;
-
-
-    
