@@ -62,7 +62,7 @@ async function checkadmin(msg){
                { 
                  console.log("Non admin command")
                  bot.sendMessage(msg.chat.id,"Warning : Only admin can send commands!");
-                 ; }
+                 ret = false; }
 
            // return ret
         }  
@@ -300,16 +300,16 @@ bot.onText(/\/unban/, (msg) =>{
         })
 
 //help command
-bot.onText(/\/help/, (msg) => {
-    if(checkadmin(msg)){
+bot.onText(/\/help/, async(msg) => {
+    if(await checkadmin(msg)){
     let ans = helpMsg
     bot.sendMessage(msg.chat.id,ans)
     }
     });           
 //about command     
 bot.onText(/\/about/, async(msg) => {
-    var val = await checkadmin(msg)
-    if(val){
+    
+    if(await checkadmin(msg)){
         console.log(val,"val")
         let ans = aboutMsg
         bot.sendMessage(msg.chat.id,ans)
