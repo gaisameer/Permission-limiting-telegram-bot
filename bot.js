@@ -49,22 +49,26 @@ var j = schedule.scheduleJob({hour: 0, minute: 0}, function(){
 
 
 //admin check
-function checkadmin(msg){
-
-    bot.getChatMember(msg.chat.id, msg.from.id).then(function(data) { 
+async function checkadmin(msg){
+    var ret = false;
+    await bot.getChatMember(msg.chat.id, msg.from.id).then(function(data) { 
         {
             if ((data.status == "creator") || (data.status == "administrator")){
                 console.log("Command send by Admin");
-                return true;
+                ret = true;
                 
             }
             else
                { 
                  console.log("Non admin command")
                  bot.sendMessage(msg.chat.id,"Warning : Only admin can send commands!");
-                 return false; }
+                 ; }
+
+           // return ret
         }  
     });
+    //await console.log(ret)
+    return ret
 }
 
 
@@ -89,6 +93,7 @@ bot.onText(/\/start/, (msg) => {
         docs.forEach(user => {
             console.log("adding count of " + user.count + " to " + user.userId)
             arr[user.userId] = user.count
+            console.log(arr)
         })
     })
 
@@ -168,18 +173,20 @@ bot.on('message', (msg) => {
     
 //showing count
 bot.onText(/\/count/, (msg) => {
-
-    if (checkadmin(msg)==true){
+    //console.log(checkadmin(msg),"hi")
+    
         let ans = ""
         for(var key in arr){
-            console.log(key+" : " + username[key] + ":" + arr[key])
-            ans += username[key] + " : " + arr[key] + "\n"
+            console.log(key + ":" + arr[key])
+            ans += key + " : " + arr[key] + "\n"
         }
         bot.sendMessage(msg.chat.id,ans)
-    }
+
     });
 //make someone premium
 bot.onText(/\/premium/, (msg) =>{
+       
+    if(checkadmin(msg)){
         let ans = ""
         if(msg.from.id in premium && msg.reply_to_message!=null){
             if(premium[msg.from.id]==2 && msg.from.is_bot==false && !(msg.reply_to_message.from.id  in premium)){
@@ -220,24 +227,28 @@ bot.onText(/\/premium/, (msg) =>{
                 console.log(e)
             }
 
-
+        }
         });
 
 //view who is premium
 bot.onText(/\/view/, (msg) =>{
-    if(checkadmin(msg)){
-        let ans = "Prime Members:\n"
-        a = Object.keys(premium)
-        a.forEach(element => {
-            ans+=element+"\n"
-        });
-        bot.sendMessage(msg.chat.id,ans)
+    
+    if(checkadmin(msg)){    
+        if(checkadmin(msg)){
+            let ans = "Prime Members:\n"
+            a = Object.keys(premium)
+            a.forEach(element => {
+                ans+=element+"\n"
+            });
+            bot.sendMessage(msg.chat.id,ans)
+        }
     }
 });
 
 
 //unban logic
 bot.onText(/\/unban/, (msg) =>{
+    if(checkadmin(msg)){
     if(msg.from.id in premium && msg.reply_to_message!=null){
         if(premium[msg.from.id]==2 && msg.from.is_bot==false && !(msg.reply_to_message.from.id  in premium)){
                 var d5 = bot.restrictChatMember(msg.chat.id,
@@ -262,11 +273,14 @@ bot.onText(/\/unban/, (msg) =>{
                         }
                     })
 
-            }}})
+            }}
+        }
+        })
 
 //remove from premium    
     bot.onText(/\/remove/, (msg) =>{
-    if(msg.from.id in premium && msg.reply_to_message!=null){
+        if(checkadmin(msg)){
+        if(msg.from.id in premium && msg.reply_to_message!=null){
         if(premium[msg.from.id]==2 && msg.from.is_bot==false && (msg.reply_to_message.from.id  in premium)){
                 member.deleteOne({userId : msg.reply_to_message.from.id ,groupId : msg.chat.id},(err, docs)=>{
         console.log(docs)
@@ -275,21 +289,31 @@ bot.onText(/\/unban/, (msg) =>{
             if(err){
                 console.log('Failed to remove from premium member db.')
             }else{
+                bot.sendMessage(msg.chat.id,msg.reply_to_message.from.id + " is no longer a premium member")
                 console.log('Removed from premium member db.')
             }
         })
      })
-            }}})
+            }}
+        
+        }
+        })
 
 //help command
 bot.onText(/\/help/, (msg) => {
+    if(checkadmin(msg)){
     let ans = helpMsg
     bot.sendMessage(msg.chat.id,ans)
+    }
     });           
 //about command     
-bot.onText(/\/about/, (msg) => {
-    let ans = aboutMsg
-    bot.sendMessage(msg.chat.id,ans)
+bot.onText(/\/about/, async(msg) => {
+    var val = await checkadmin(msg)
+    if(val){
+        console.log(val,"val")
+        let ans = aboutMsg
+        bot.sendMessage(msg.chat.id,ans)
+    }
     });   
 
 module.exports = bot;
