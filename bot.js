@@ -23,7 +23,6 @@ let arr = {}
 var premium = {}
 let username = {}
 
-
 //const messages
 const helpMsg = `Command reference:
 /start - Start bot (mandatory in groups)
@@ -76,12 +75,13 @@ function checkadmin(msg){
 bot.onText(/\/start/, (msg) => {
     bot.sendMessage(msg.chat.id, "bot started");
 
+    premium[msg.chat.id]={}
 
     //getting admins
     bot.getChatAdministrators(msg.chat.id)
     .then(v=>v.forEach(element => {
-        if(element.user.is_bot==false && !(element.user.id  in premium) ){
-            premium[element.user.id]=2
+        if(element.user.is_bot==false && !(element.user.id  in premium[msg.chat.id]) ){
+            premium[msg.chat.id][element.user.id]=2
             }   
     console.log("premium    :: ",premium);
     }));
@@ -92,7 +92,7 @@ bot.onText(/\/start/, (msg) => {
         docs.forEach(user => {
             console.log(user.userId)
             if(!(user.userId  in premium) ){
-                premium[user.userId]=1
+                premium[user.groupId][user.userId]=1
                 }
         })
      })
@@ -134,7 +134,10 @@ bot.on('message', (msg) => {
        console.log("user added into db")
     }
     console.log(arr); 
-    if(!(user in premium)){
+    if(!(msg.chat.id in premium)){
+        premium[msg.chat.id]={}
+    }
+    if(!(user in premium[msg.chat.id])){
         if(arr[user] ==3 && msg.text.indexOf("/start")!=0){
             
              bot.restrictChatMember(msg.chat.id,
@@ -162,8 +165,8 @@ bot.on('message', (msg) => {
     
 //showing count
 bot.onText(/\/count/, (msg) => {
-
-    if (true){
+    var a = checkadmin(msg);
+    if (a){
         let ans = ""
         for(var key in arr){
             console.log(key+" : " + username[key] + ":" + arr[key])
@@ -171,12 +174,15 @@ bot.onText(/\/count/, (msg) => {
         }
         bot.sendMessage(msg.chat.id,ans)
     }
+    else{
+        bot.sendMessage(msg.chat.id,"Warning : Only admin can send commands!");
+    }
     });
 //make someone premium
 bot.onText(/\/premium/, (msg) =>{
         let ans = ""
-        if(msg.from.id in premium && msg.reply_to_message!=null){
-            if(premium[msg.from.id]==2 && msg.from.is_bot==false && !(msg.reply_to_message.from.id  in premium)){
+        if(msg.from.id in premium[msg.chat.id] && msg.reply_to_message!=null){
+            if(premium[msg.chat.id][msg.from.id]==2 && msg.from.is_bot==false && !(msg.reply_to_message.from.id  in premium[msg.chat.id])){
                     premium[msg.reply_to_message.from.id]=1;
                     }
             ans +=msg.reply_to_message.from.first_name+" "+msg.reply_to_message.from.last_name +" was added to premium"
@@ -227,20 +233,37 @@ bot.onText(/\/premium/, (msg) =>{
         });
 
 //view who is premium
-bot.onText(/\/view/, (msg) =>{
-    let ans = "Prime Members:\n"
-    a = Object.keys(premium)
-    a.forEach(element => {
-        ans+=element+"\n"
-    });
-    bot.sendMessage(msg.chat.id,ans)
-});
+// bot.onText(/\/view/, (msg) =>{
+//     bot.getChatMember(msg.chat.id, msg.from.id).then((data)=>{
+//         if ((data.status == "creator") || (data.status == "administrator")){
+//         a = true
+//         console.log("Command send by Admin");
+//     }
+//     else
+//        { 
+//          a = false; 
+//          console.log("Non admin command")
+//         }
+//         return a;
+//     })
+//     if(a){
+//         let ans = "Prime Members:\n"
+//         a = Object.keys(premium[msg.chat.id])
+//         a.forEach(element => {
+//             ans+=element+"\n"
+//         });
+//         bot.sendMessage(msg.chat.id,ans)
+//     }
+//     else{
+//         bot.sendMessage(msg.chat.id,"Warning : Only admin can send commands!");
+//     }
+// });
 
 
 //unban logic
 bot.onText(/\/unban/, (msg) =>{
     if(msg.from.id in premium && msg.reply_to_message!=null){
-        if(premium[msg.from.id]==2 && msg.from.is_bot==false && !(msg.reply_to_message.from.id  in premium)){
+        if(premium[msg.chat.id][msg.from.id]==2 && msg.from.is_bot==false && !(msg.reply_to_message.from.id  in premium[msg.chat.id])){
                 var d5 = bot.restrictChatMember(msg.chat.id,
                     msg.reply_to_message.from.id,                          
                     {
@@ -267,12 +290,12 @@ bot.onText(/\/unban/, (msg) =>{
 
 //remove from premium    
     bot.onText(/\/remove/, (msg) =>{
-    if(msg.from.id in premium && msg.reply_to_message!=null){
-        if(premium[msg.from.id]==2 && msg.from.is_bot==false && (msg.reply_to_message.from.id  in premium)){
+    if(msg.from.id in premium[msg.chat.id] && msg.reply_to_message!=null){
+        if(premium[msg.chat.id][msg.from.id]==2 && msg.from.is_bot==false && (msg.reply_to_message.from.id  in premium[msg.chat.id])){
         
         delete arr[msg.reply_to_message.from.id];       
-        delete premium[msg.reply_to_message.from.id];
-        if(msg.reply_to_message.from.id in premium)
+        delete premium[msg.chat.id][msg.reply_to_message.from.id];
+        if(msg.reply_to_message.from.id in premium[msg.chat.id])
             console.log("not reomved from premium")
         else
             console.log("removed from premium")
@@ -296,6 +319,27 @@ bot.onText(/\/about/, (msg) => {
     let ans = aboutMsg
     bot.sendMessage(msg.chat.id,ans)
     });   
+
+
+
+
+
+    bot.onText(/\/view/, (msg) =>{
+        
+        if(checkadmin(msg)){
+            let ans = "Prime Members:\n"
+            a = Object.keys(premium[msg.chat.id])
+            a.forEach(element => {
+                ans+=element+"\n"
+            });
+            bot.sendMessage(msg.chat.id,ans)
+        }
+        else{
+            bot.sendMessage(msg.chat.id,"Warning : Only admin can send commands!");
+        }
+    });
+
+
 
 module.exports = bot;
 
