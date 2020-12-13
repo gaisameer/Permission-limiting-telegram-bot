@@ -27,9 +27,11 @@ var premium = {}
 //const messages
 const helpMsg = `Command reference:
 /start - Start bot (mandatory in groups)
-/premium - To change a user to premium ( This should be sent as reply to a message that the user sent. This command will only work if it is used by an admin
+/premium - To change a user to premium ( This should be sent as reply to a message that the user sent. This command will only work if it is used by an admin. All admins are promoted as premium members on /start)
 /unban - Command to unban a user. Will only work if used by an admin
-/stop - Attemt to stop bot
+/remove - To remove premium previllages
+/count - To see message count
+/view - To view the premium members
 /about - Show information about the bot
 /help - Show this help page`;
 
@@ -37,15 +39,30 @@ const helpMsg = `Command reference:
 const aboutMsg = "This bot was created by @gais_ameer @sachinhere1 & @Sonusurabhi\nSource code and contact information can be found at https://github.com/sachin-in1/salesmngr_bot";
 
 //counter reset logic
-var j = schedule.scheduleJob({hour: 0, minute: 0}, function(){
+var j = schedule.scheduleJob({hour: 00, minute: 00}, function(){
     console.log('counter reset!');
-    arr=[]
+    arr={}
     counter.deleteMany({}).then((res)=>{
         console.log('counter db cleared at midnight')
+        var today = new Date();
+        var date =  today.getDate()+'-'+(today.getMonth()+1)+'-'+today.getFullYear();
+        var time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
+        console.log("reset time :: " + time + "   date :: " + date)
     }).catch((err)=>{
         console.log('clearing db at midnight failed')
     })
   });
+
+
+
+ /* To get documents for today, or better say from last midnight:
+
+db.collection.find( { $where: function() { 
+    today = new Date(); //
+    today.setHours(0,0,0,0);
+    return (this._id.getTimestamp() >= today)
+} } );
+ */ 
 
 
 //admin check
@@ -144,7 +161,7 @@ bot.on('message', (msg) => {
         // console.log(Count.userId)
         }
     
-    console.log("messag count  :: ",arr); 
+    console.log("message count  :: ",arr); 
     if(!(user in premium)){
         if(arr[user] ==3 && msg.text.indexOf("/start")!=0){
             
@@ -213,7 +230,7 @@ bot.onText(/\/premium/, async(msg) =>{
                 }).catch((e)=>{
                     console.log('failed to lift ban..')
                 })
-                arr[msg.reply_to_message.from.id]=0;
+                //arr[msg.reply_to_message.from.id]=0;
             }
 
             var user = new member({
@@ -264,13 +281,13 @@ bot.onText(/\/unban/, async(msg) =>{
                     can_change_info:true,
                     can_pin_messages:true});
                     var value = msg.reply_to_message.from.id
-                   delete arr.value
+                   delete arr[msg.reply_to_message.from.id]
                    console.log(value , arr)
                     counter.deleteOne({ userId : msg.reply_to_message.from.id , groupId : msg.chat.id}, (err,res)=>{
                         if(err){
                             console.log('Failed to clear counter db')
                         }else{
-                            console.log('clear counter db')
+                            console.log('clear counter db, user ban lifted by admin')
                         }
                     })
 
@@ -286,6 +303,7 @@ bot.onText(/\/unban/, async(msg) =>{
                 member.deleteOne({userId : msg.reply_to_message.from.id ,groupId : msg.chat.id},(err, docs)=>{
         console.log(docs)
         delete premium[msg.reply_to_message.from.id];
+        delete arr[msg.reply_to_message.from.id];
         member.deleteOne({ userId : msg.reply_to_message.from.id , groupId : msg.chat.id}, (err,res)=>{
             if(err){
                 console.log('Failed to remove from premium member db.')
